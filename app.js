@@ -36,20 +36,50 @@ server.route({
     }
 });
 server.route({
-    method: 'GET',
-    path: '/send',
+    method: 'POST',
+    path: '/admin/add',
     handler: function(request, reply) {
-        emit("DFBDSJKFNDSKL");
-        return reply("sned");
+        var payload = request.payload
+        connection.query("INSERT INTO address(name,ip,mac,valid) VALUES('" + payload.name + "','" + payload.ip + "','" + payload.mac + "',1)", function(error, results, fields) {
+            if (error) throw error;
+            emit("refresh")
+        });
+
+        return reply(payload);
+    }
+});
+server.route({
+    method: 'POST',
+    path: '/admin/delete',
+    handler: function(request, reply) {
+        var payload = request.payload
+        connection.query("DELETE FROM address WHERE name='" + payload.name + "'", function(error, results, fields) {
+            if (error) throw error;
+            emit("refresh")
+        });
+
+        return reply(payload);
+    }
+});
+server.route({
+    method: 'POST',
+    path: '/update',
+    handler: function(request, reply) {
+        var payload = request.payload
+        connection.query("UPDATE address SET valid=1,ip='" + payload.ip + "' WHERE name='" + payload.name + "'", function(error, results, fields) {
+            if (error) throw error;
+
+
+        });
+        return reply("success");
     }
 });
 server.route({
     method: 'GET',
     path: '/load',
     handler: function(request, reply) {
-        connection.query('SELECT * FROM address', function(error, results, fields) {
+        connection.query("SELECT * FROM address", function(error, results, fields) {
             if (error) throw error;
-            console.log('The solution is: ', results[0].name);
             return reply(JSON.stringify(results));
         });
     }
